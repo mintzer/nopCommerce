@@ -115,7 +115,7 @@ public class UpdateExchangeRateTaskTests
     }
 
     [Test]
-    public void ExecuteAsync_ProviderThrows_ShouldPropagateException()
+    public async Task ExecuteAsync_ProviderThrows_ShouldPropagateException()
     {
         _currencySettings.AutoUpdateEnabled = true;
 
@@ -125,7 +125,7 @@ public class UpdateExchangeRateTaskTests
 
         var act = () => _task.ExecuteAsync();
 
-        act.Should().ThrowAsync<InvalidOperationException>()
+        (await act.Should().ThrowAsync<InvalidOperationException>())
             .WithMessage("Provider unavailable");
     }
 }
