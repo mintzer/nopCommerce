@@ -115,7 +115,8 @@ public class EcbExchangeRateProviderTests
         var rates = await _provider.GetCurrencyLiveRatesAsync("EUR");
 
         var expectedDate = new DateTime(2024, 1, 15);
-        foreach (var rate in rates)
+        // EUR entry is created with DateTime.UtcNow before XML parsing; only XML-sourced rates get the parsed date
+        foreach (var rate in rates.Where(r => r.CurrencyCode != "EUR"))
         {
             rate.UpdatedOn.Should().Be(expectedDate);
         }
