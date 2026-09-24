@@ -6,11 +6,7 @@ namespace Nop.Tests.Nop.Services.Tests.Directory;
 
 public class TestExchangeRateProvider : BasePlugin, IExchangeRateProvider
 {
-    /// <summary>
-    /// Gets or sets the rates to return from <see cref="GetCurrencyLiveRatesAsync"/>.
-    /// When non-null, these rates are returned instead of an empty list.
-    /// Set to null (the default) to restore the original empty-list behavior.
-    /// </summary>
+    /// <summary>Gets or sets the rates to return from <see cref="GetCurrencyLiveRatesAsync"/>; null restores empty-list behavior.</summary>
     public static IList<ExchangeRate>? RatesToReturn { get; set; }
 
     /// <summary>
