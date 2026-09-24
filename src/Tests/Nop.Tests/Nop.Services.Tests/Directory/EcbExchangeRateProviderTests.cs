@@ -98,13 +98,13 @@ public class EcbExchangeRateProviderTests
     }
 
     [Test]
-    public void GetCurrencyLiveRatesAsync_UnknownBaseCurrency_ThrowsNopException()
+    public async Task GetCurrencyLiveRatesAsync_UnknownBaseCurrency_ThrowsNopException()
     {
         SetupHttpClient(ValidEcbXml);
 
         var act = () => _provider.GetCurrencyLiveRatesAsync("XYZ");
 
-        act.Should().ThrowAsync<NopException>();
+        await act.Should().ThrowAsync<NopException>();
     }
 
     [Test]
