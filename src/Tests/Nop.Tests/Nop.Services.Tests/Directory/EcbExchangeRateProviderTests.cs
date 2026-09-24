@@ -125,15 +125,23 @@ public class EcbExchangeRateProviderTests
     [Test]
     public async Task GetCurrencyLiveRatesAsync_NetworkFailure_LogsErrorAndReturnsEurEntry()
     {
-        var handler = new MockHttpMessageHandler(_ =>
-            throw new HttpRequestException("Network error"));
-        var httpClient = new HttpClient(handler)
-        {
-            BaseAddress = new Uri("https://www.ecb.europa.eu")
-        };
-        _httpClientFactoryMock
-            .Setup(f => f.CreateClient(NopHttpDefaults.DefaultHttpClient))
-            .Returns(httpClient);
+        SetupHttpClient(_ => throw new HttpRequestException("Network error"));
+
+        var rates = await _provider.GetCurrencyLiveRatesAsync("EUR");
+
+        rates.Should().HaveCount(1);
+        rates[0].CurrencyCode.Should().Be("EUR");
+        rates[0].Rate.Should().Be(1.0m);
+
+        _loggerMock.Verify(
+            l => l.ErrorAsync("ECB exchange rate provider", It.IsAny<Exception>(), null),
+            Times.Once);
+    }
+
+    [Test]
+    public async Task GetCurrencyLiveRatesAsync_MalformedXml_LogsErrorAndReturnsEurEntry()
+    {
+        SetupHttpClient("this is not valid XML");
 
         var rates = await _provider.GetCurrencyLiveRatesAsync("EUR");
 
@@ -148,11 +156,16 @@ public class EcbExchangeRateProviderTests
 
     private void SetupHttpClient(string xmlContent)
     {
-        var handler = new MockHttpMessageHandler(_ =>
+        SetupHttpClient(_ =>
             new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(xmlContent, Encoding.UTF8, "application/xml")
             });
+    }
+
+    private void SetupHttpClient(Func<HttpRequestMessage, HttpResponseMessage> handlerFunc)
+    {
+        var handler = new MockHttpMessageHandler(handlerFunc);
         var httpClient = new HttpClient(handler)
         {
             BaseAddress = new Uri("https://www.ecb.europa.eu")
