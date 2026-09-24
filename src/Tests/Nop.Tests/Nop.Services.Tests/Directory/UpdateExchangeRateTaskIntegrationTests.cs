@@ -61,19 +61,23 @@ public class UpdateExchangeRateTaskIntegrationTests : ServiceTest
 
     private async Task<UpdateExchangeRateTask> CreateTaskWithFreshSettingsAsync()
     {
-        // Resolve fresh instances so they pick up updated CurrencySettings from the DB
         var freshSettings = await _settingService.LoadSettingAsync<CurrencySettings>();
         var freshCurrencyService = GetService<ICurrencyService>();
         return new UpdateExchangeRateTask(freshSettings, freshCurrencyService);
     }
 
+    private async Task ConfigureSettingsAsync(bool autoUpdateEnabled)
+    {
+        var settings = await _settingService.LoadSettingAsync<CurrencySettings>();
+        settings.AutoUpdateEnabled = autoUpdateEnabled;
+        settings.ActiveExchangeRateProviderSystemName = "CurrencyExchange.TestProvider";
+        await _settingService.SaveSettingAsync(settings);
+    }
+
     [Test]
     public async Task ExecuteAsync_FullPipelineWithKnownRates_UpdatesCurrencyEntities()
     {
-        var settings = await _settingService.LoadSettingAsync<CurrencySettings>();
-        settings.AutoUpdateEnabled = true;
-        settings.ActiveExchangeRateProviderSystemName = "CurrencyExchange.TestProvider";
-        await _settingService.SaveSettingAsync(settings);
+        await ConfigureSettingsAsync(true);
 
         TestExchangeRateProvider.RatesToReturn = new List<ExchangeRate>
         {
@@ -103,10 +107,7 @@ public class UpdateExchangeRateTaskIntegrationTests : ServiceTest
     [Test]
     public async Task ExecuteAsync_CurrenciesNotInProviderResponse_RemainUnchanged()
     {
-        var settings = await _settingService.LoadSettingAsync<CurrencySettings>();
-        settings.AutoUpdateEnabled = true;
-        settings.ActiveExchangeRateProviderSystemName = "CurrencyExchange.TestProvider";
-        await _settingService.SaveSettingAsync(settings);
+        await ConfigureSettingsAsync(true);
 
         TestExchangeRateProvider.RatesToReturn = new List<ExchangeRate>
         {
@@ -128,10 +129,7 @@ public class UpdateExchangeRateTaskIntegrationTests : ServiceTest
     [Test]
     public async Task ExecuteAsync_AutoUpdateDisabled_DoesNotUpdateAnyCurrency()
     {
-        var settings = await _settingService.LoadSettingAsync<CurrencySettings>();
-        settings.AutoUpdateEnabled = false;
-        settings.ActiveExchangeRateProviderSystemName = "CurrencyExchange.TestProvider";
-        await _settingService.SaveSettingAsync(settings);
+        await ConfigureSettingsAsync(false);
 
         TestExchangeRateProvider.RatesToReturn = new List<ExchangeRate>
         {
