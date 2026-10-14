@@ -4,10 +4,9 @@ import os
 import subprocess
 import sys
 
-WORKSPACE_DIR = os.path.abspath(os.environ.get("WORKSPACE_DIR", r"C:\l2l\workspace"))
+from conftest import WORKSPACE_DIR, REPO_DIR, TEST_PROJECT, run_dotnet_test
+
 SANDBOX_ROOT = os.environ.get("SANDBOX_ROOT", r"C:\l2l")
-REPO_DIR = os.path.join(WORKSPACE_DIR, "nopCommerce")
-TEST_PROJECT = os.path.join(REPO_DIR, "src", "Tests", "Nop.Tests", "Nop.Tests.csproj")
 WRITE_RESULTS = os.path.join(SANDBOX_ROOT, ".claude", "skills", "sandbox-app-runner", "write_test_results.py")
 
 # All tests to run: (test_name, nunit_filter, category, description)
@@ -122,16 +121,10 @@ TESTS = [
 
 
 def run_test(nunit_filter: str) -> tuple:
-    """Run a single NUnit test and return (exit_code, stdout, duration_ms)."""
-    cmd = [
-        "dotnet", "test", TEST_PROJECT,
-        "--no-build",
-        "--verbosity", "normal",
-        "--filter", f"FullyQualifiedName~{nunit_filter}",
-    ]
+    """Run a single NUnit test and return (exit_code, output, duration_ms)."""
     import time
     start = time.time()
-    result = subprocess.run(cmd, cwd=REPO_DIR, capture_output=True, text=True, timeout=300)
+    result = run_dotnet_test(f"FullyQualifiedName~{nunit_filter}")
     elapsed_ms = (time.time() - start) * 1000
     output = result.stdout + (("\n" + result.stderr) if result.stderr else "")
     return result.returncode, output, elapsed_ms
