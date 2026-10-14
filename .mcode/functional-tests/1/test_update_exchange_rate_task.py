@@ -10,7 +10,6 @@ the UpdateExchangeRateTask:
   - Exception propagation
 """
 
-import pytest
 from conftest import run_dotnet_test, parse_test_result
 
 FILTER_PREFIX = "FullyQualifiedName~UpdateExchangeRateTaskTests"

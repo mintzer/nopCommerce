@@ -10,7 +10,6 @@ in EcbExchangeRateProviderTests.cs, verifying the ECB provider:
   - Malformed XML handling
 """
 
-import pytest
 from conftest import run_dotnet_test, parse_test_result
 
 FILTER_PREFIX = "FullyQualifiedName~EcbExchangeRateProviderTests"

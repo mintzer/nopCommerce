@@ -8,7 +8,6 @@ pipeline through the DI container and SQLite database:
   - AutoUpdateEnabled guard at integration level
 """
 
-import pytest
 from conftest import run_dotnet_test, parse_test_result
 
 FILTER_PREFIX = "FullyQualifiedName~UpdateExchangeRateTaskIntegrationTests"

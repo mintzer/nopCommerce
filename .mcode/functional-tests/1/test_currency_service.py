@@ -7,7 +7,6 @@ methods added in this milestone, verifying:
   - UpdateCurrencyAsync persists rate changes
 """
 
-import pytest
 from conftest import run_dotnet_test, parse_test_result
 
 FILTER_PREFIX = "FullyQualifiedName~CurrencyServiceTests"

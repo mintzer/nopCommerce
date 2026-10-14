@@ -3,7 +3,6 @@
 import os
 import subprocess
 import sys
-import re
 
 WORKSPACE_DIR = os.path.abspath(os.environ.get("WORKSPACE_DIR", r"C:\l2l\workspace"))
 SANDBOX_ROOT = os.environ.get("SANDBOX_ROOT", r"C:\l2l")
