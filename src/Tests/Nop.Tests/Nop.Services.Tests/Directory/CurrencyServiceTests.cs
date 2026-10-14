@@ -25,6 +25,71 @@ public class CurrencyServiceTests : ServiceTest<Currency>
     }
 
     [Test]
+    public async Task GetCurrencyLiveRatesAsync_ShouldLoadPrimaryPluginAndDelegateToProvider()
+    {
+        var expectedRates = new List<ExchangeRate>
+        {
+            new() { CurrencyCode = "USD", Rate = 1.18m },
+            new() { CurrencyCode = "GBP", Rate = 0.86m }
+        };
+
+        TestExchangeRateProvider.RatesToReturn = expectedRates;
+        try
+        {
+            var rates = await _currencyService.GetCurrencyLiveRatesAsync();
+
+            rates.Should().NotBeNull();
+            rates.Should().HaveCount(2);
+            rates[0].CurrencyCode.Should().Be("USD");
+            rates[0].Rate.Should().Be(1.18m);
+            rates[1].CurrencyCode.Should().Be("GBP");
+            rates[1].Rate.Should().Be(0.86m);
+        }
+        finally
+        {
+            TestExchangeRateProvider.RatesToReturn = null;
+        }
+    }
+
+    [Test]
+    public async Task GetCurrencyByCodeAsync_ShouldMatchCaseInsensitively()
+    {
+        var byUpper = await _currencyService.GetCurrencyByCodeAsync("USD");
+        var byLower = await _currencyService.GetCurrencyByCodeAsync("usd");
+        var byMixed = await _currencyService.GetCurrencyByCodeAsync("Usd");
+
+        byUpper.Should().NotBeNull();
+        byLower.Should().NotBeNull();
+        byMixed.Should().NotBeNull();
+        byLower!.Id.Should().Be(byUpper!.Id);
+        byMixed!.Id.Should().Be(byUpper.Id);
+    }
+
+    [Test]
+    public async Task UpdateCurrencyAsync_ShouldPersistNewRateValue()
+    {
+        var currency = await _currencyService.GetCurrencyByCodeAsync("EUR");
+        currency.Should().NotBeNull();
+
+        var originalRate = currency!.Rate;
+        var newRate = 99.1234m;
+
+        currency.Rate = newRate;
+        await _currencyService.UpdateCurrencyAsync(currency);
+        try
+        {
+            var reloaded = await _currencyService.GetCurrencyByIdAsync(currency.Id);
+            reloaded.Should().NotBeNull();
+            reloaded!.Rate.Should().Be(newRate);
+        }
+        finally
+        {
+            currency.Rate = originalRate;
+            await _currencyService.UpdateCurrencyAsync(currency);
+        }
+    }
+
+    [Test]
     public async Task CanLoadExchangeRateProviders()
     {
         var providers = await _exchangeRatePluginManager.LoadAllPluginsAsync();
