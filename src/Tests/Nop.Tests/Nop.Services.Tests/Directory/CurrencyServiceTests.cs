@@ -76,13 +76,17 @@ public class CurrencyServiceTests : ServiceTest<Currency>
 
         currency.Rate = newRate;
         await _currencyService.UpdateCurrencyAsync(currency);
-
-        var reloaded = await _currencyService.GetCurrencyByIdAsync(currency.Id);
-        reloaded.Should().NotBeNull();
-        reloaded!.Rate.Should().Be(newRate);
-
-        reloaded.Rate = originalRate;
-        await _currencyService.UpdateCurrencyAsync(reloaded);
+        try
+        {
+            var reloaded = await _currencyService.GetCurrencyByIdAsync(currency.Id);
+            reloaded.Should().NotBeNull();
+            reloaded!.Rate.Should().Be(newRate);
+        }
+        finally
+        {
+            currency.Rate = originalRate;
+            await _currencyService.UpdateCurrencyAsync(currency);
+        }
     }
 
     [Test]
