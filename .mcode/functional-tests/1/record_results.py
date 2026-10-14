@@ -164,7 +164,13 @@ def main():
     failed = 0
     for name, nunit_filter, category, description in TESTS:
         print(f"\n--- Running: {name} ---")
-        exit_code, output, duration_ms = run_test(nunit_filter)
+        try:
+            exit_code, output, duration_ms = run_test(nunit_filter)
+        except subprocess.TimeoutExpired:
+            print(f"  TIMEOUT: {name} exceeded 300s limit")
+            exit_code = 1
+            output = "ERROR: Test timed out after 300s"
+            duration_ms = 300_000.0
 
         if exit_code == 0 and "Test Run Successful" in output:
             status = "PASSED"
@@ -174,7 +180,10 @@ def main():
             failed += 1
 
         print(f"  {status} (exit={exit_code}, {duration_ms:.0f}ms)")
-        record_result(name, exit_code, output, duration_ms, category, description)
+        try:
+            record_result(name, exit_code, output, duration_ms, category, description)
+        except subprocess.CalledProcessError as exc:
+            print(f"  WARNING: record_result failed for {name}: {exc}")
 
     print(f"\n=== SUMMARY: {passed + failed} total, {passed} passed, {failed} failed ===")
     return 0 if failed == 0 else 1
