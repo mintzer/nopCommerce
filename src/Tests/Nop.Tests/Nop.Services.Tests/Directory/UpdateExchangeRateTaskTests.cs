@@ -115,6 +115,31 @@ public class UpdateExchangeRateTaskTests
     }
 
     [Test]
+    public async Task ExecuteAsync_RateValueAccuracy_ShouldStoreExactRateWithoutRounding()
+    {
+        _currencySettings.AutoUpdateEnabled = true;
+
+        var preciseRate = 1.23456789m;
+        var exchangeRates = new List<ExchangeRate>
+        {
+            new() { CurrencyCode = "USD", Rate = preciseRate }
+        };
+
+        var usd = new Currency { Id = 1, CurrencyCode = "USD", Rate = 1.0m };
+
+        _currencyServiceMock
+            .Setup(s => s.GetCurrencyLiveRatesAsync(It.IsAny<string>()))
+            .ReturnsAsync(exchangeRates);
+        _currencyServiceMock
+            .Setup(s => s.GetCurrencyByCodeAsync("USD"))
+            .ReturnsAsync(usd);
+
+        await _task.ExecuteAsync();
+
+        usd.Rate.Should().Be(preciseRate);
+    }
+
+    [Test]
     public async Task ExecuteAsync_ProviderThrows_ShouldPropagateException()
     {
         _currencySettings.AutoUpdateEnabled = true;

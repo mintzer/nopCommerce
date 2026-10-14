@@ -7,7 +7,7 @@ the UpdateExchangeRateTask:
   - Happy path rate/timestamp updates
   - Unknown currency handling
   - Empty results handling
-  - Exception propagation
+  - Rate value accuracy
 """
 
 from conftest import assert_single_test_passes
@@ -52,10 +52,10 @@ class TestEmptyResults:
         )
 
 
-class TestExceptionPropagation:
-    """Verify provider exceptions propagate through ExecuteAsync."""
+class TestRateValueAccuracy:
+    """Verify exact Rate value from provider is stored on Currency without rounding."""
 
-    def test_provider_exception_propagates(self, verify_build):
+    def test_rate_value_stored_exactly(self, verify_build):
         assert_single_test_passes(
-            f"{FILTER_PREFIX}.ExecuteAsync_ProviderThrows_ShouldPropagateException"
+            f"{FILTER_PREFIX}.ExecuteAsync_RateValueAccuracy_ShouldStoreExactRateWithoutRounding"
         )

@@ -37,10 +37,10 @@ TESTS = [
         "No UpdateCurrencyAsync calls when provider returns empty list",
     ),
     (
-        "test_provider_exception_propagates",
-        "UpdateExchangeRateTaskTests.ExecuteAsync_ProviderThrows_ShouldPropagateException",
-        "BOUNDARY",
-        "Provider exceptions propagate through ExecuteAsync unmodified",
+        "test_rate_value_stored_exactly",
+        "UpdateExchangeRateTaskTests.ExecuteAsync_RateValueAccuracy_ShouldStoreExactRateWithoutRounding",
+        "HAPPY_PATH",
+        "Exact Rate value from provider is stored on Currency entity without rounding or transformation",
     ),
     # Integration tests
     (
