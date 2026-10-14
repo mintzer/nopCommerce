@@ -93,6 +93,22 @@ def parse_test_result(stdout: str) -> dict:
     return info
 
 
+def assert_single_test_passes(filter_expr: str, timeout: int = 300) -> dict:
+    """Run a single dotnet test and assert it passed.
+
+    Returns:
+        Parsed test result dict so callers can make additional assertions.
+    """
+    result = run_dotnet_test(filter_expr, timeout=timeout)
+    info = parse_test_result(result.stdout)
+    assert result.returncode == 0, (
+        f"dotnet test exited {result.returncode}.\n"
+        f"stdout: {result.stdout[-2000:]}\nstderr: {result.stderr[-2000:]}"
+    )
+    assert info["passed"] == 1, f"Expected 1 passed test, got {info}"
+    return info
+
+
 @pytest.fixture(scope="session", autouse=True)
 def verify_build():
     """Verify the solution is already built (we rely on pre-build via lifecycle)."""
